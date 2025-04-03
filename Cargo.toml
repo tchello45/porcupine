@@ -1,0 +1,12 @@
+[package]
+name = "porcupine"
+version = "0.1.0"
+edition = "2024"
+authors = ["Tilman Kurmayer <tilman.kurmayer@gmail.com>"]
+description = "Encrypts and decrypts files securely"
+
+[dependencies]
+aes-gcm = "0.10.3"
+argon2 = "0.5.3"
+clap = { version = "4.5.34", features = ["derive"] }
+rpassword = "7.3.1"
