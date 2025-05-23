@@ -283,4 +283,17 @@ mod tests {
         fs::remove_file(&input_file).expect("Unable to remove input file");
         fs::remove_file(&output_file).expect("Unable to remove output file");
     }
+
+    #[test]
+    fn test_main() {
+        let args: Vec<String> = vec![
+            "test".to_string(),
+            "encrypt".to_string(),
+            "test_input.txt".to_string(),
+            "--output".to_string(),
+            "test_output.txt".to_string(),
+        ];
+        let _ = Cli::try_parse_from(args);
+        // Add more tests for the main function if needed
+    }
 }
