@@ -217,6 +217,7 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::env::temp_dir;
 
     #[test]
     fn test_encrypt_decrypt() {
@@ -242,5 +243,22 @@ mod tests {
         let salt: [u8; 12] = generate_salt();
         let key: GenericArray<u8, _> = generate_key(password, &salt);
         assert_eq!(key.len(), 32);
+    }
+
+    #[test]
+    fn test_encrypt_file() {
+        let input_file = temp_dir().join("test_input.txt");
+        let output_file = temp_dir().join("test_output.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        let encrypted_data: Vec<u8> = fs::read(&output_file).expect("Unable to read output file");
+        assert!(encrypted_data.len() > 0);
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
     }
 }
