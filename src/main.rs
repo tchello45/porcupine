@@ -229,4 +229,10 @@ mod tests {
         let decrypted_data: Vec<u8> = decrypt(&ciphertext, &key, &nonce);
         assert_eq!(data, decrypted_data.as_slice());
     }
+
+    #[test]
+    fn test_generate_salt() {
+        let salt: [u8; 12] = generate_salt();
+        assert_eq!(salt.len(), 12);
+    }
 }
