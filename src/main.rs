@@ -285,6 +285,32 @@ mod tests {
     }
 
     #[test]
+    fn test_decrypt_file_with_invalid_password() {
+        let input_file = temp_dir().join("test_input_dec_invalid.txt");
+        let output_file = temp_dir().join("test_output_dec_invalid.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        let invalid_password: &[u8] = b"wrongpassword";
+        assert!(
+            std::panic::catch_unwind(|| {
+                decrypt_file(
+                    output_file.to_str().unwrap(),
+                    input_file.to_str().unwrap(),
+                    invalid_password,
+                )
+            })
+            .is_err()
+        );
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
+    }
+
+    #[test]
     fn test_main() {
         let args: Vec<String> = vec![
             "test".to_string(),
