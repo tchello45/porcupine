@@ -213,3 +213,20 @@ fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_encrypt_decrypt() {
+        let password: &[u8] = b"password";
+        let salt: [u8; 12] = generate_salt();
+        let key: GenericArray<u8, _> = generate_key(password, &salt);
+        let nonce = [0u8; 12];
+        let data: &[u8] = b"Hello, world!";
+        let ciphertext: Vec<u8> = encrypt(data, &key, &nonce);
+        let decrypted_data: Vec<u8> = decrypt(&ciphertext, &key, &nonce);
+        assert_eq!(data, decrypted_data.as_slice());
+    }
+}
