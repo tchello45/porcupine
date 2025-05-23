@@ -261,4 +261,26 @@ mod tests {
         fs::remove_file(&input_file).expect("Unable to remove input file");
         fs::remove_file(&output_file).expect("Unable to remove output file");
     }
+
+    #[test]
+    fn test_decrypt_file() {
+        let input_file = temp_dir().join("test_input_dec.txt");
+        let output_file = temp_dir().join("test_output_dec.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        decrypt_file(
+            output_file.to_str().unwrap(),
+            input_file.to_str().unwrap(),
+            password,
+        );
+        let decrypted_data: Vec<u8> = fs::read(&input_file).expect("Unable to read input file");
+        assert_eq!(decrypted_data, b"Hello, world!");
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
+    }
 }
