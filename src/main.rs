@@ -213,3 +213,113 @@ fn main() {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::env::temp_dir;
+
+    #[test]
+    fn test_encrypt_decrypt() {
+        let password: &[u8] = b"password";
+        let salt: [u8; 12] = generate_salt();
+        let key: GenericArray<u8, _> = generate_key(password, &salt);
+        let nonce = [0u8; 12];
+        let data: &[u8] = b"Hello, world!";
+        let ciphertext: Vec<u8> = encrypt(data, &key, &nonce);
+        let decrypted_data: Vec<u8> = decrypt(&ciphertext, &key, &nonce);
+        assert_eq!(data, decrypted_data.as_slice());
+    }
+
+    #[test]
+    fn test_generate_salt() {
+        let salt: [u8; 12] = generate_salt();
+        assert_eq!(salt.len(), 12);
+    }
+
+    #[test]
+    fn test_generate_key() {
+        let password: &[u8] = b"password";
+        let salt: [u8; 12] = generate_salt();
+        let key: GenericArray<u8, _> = generate_key(password, &salt);
+        assert_eq!(key.len(), 32);
+    }
+
+    #[test]
+    fn test_encrypt_file() {
+        let input_file = temp_dir().join("test_input.txt");
+        let output_file = temp_dir().join("test_output.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        let encrypted_data: Vec<u8> = fs::read(&output_file).expect("Unable to read output file");
+        assert!(encrypted_data.len() > 0);
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
+    }
+
+    #[test]
+    fn test_decrypt_file() {
+        let input_file = temp_dir().join("test_input_dec.txt");
+        let output_file = temp_dir().join("test_output_dec.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        decrypt_file(
+            output_file.to_str().unwrap(),
+            input_file.to_str().unwrap(),
+            password,
+        );
+        let decrypted_data: Vec<u8> = fs::read(&input_file).expect("Unable to read input file");
+        assert_eq!(decrypted_data, b"Hello, world!");
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
+    }
+
+    #[test]
+    fn test_decrypt_file_with_invalid_password() {
+        let input_file = temp_dir().join("test_input_dec_invalid.txt");
+        let output_file = temp_dir().join("test_output_dec_invalid.txt");
+        let password: &[u8] = b"password";
+        fs::write(&input_file, b"Hello, world!").expect("Unable to write input file");
+        encrypt_file(
+            input_file.to_str().unwrap(),
+            output_file.to_str().unwrap(),
+            password,
+        );
+        let invalid_password: &[u8] = b"wrongpassword";
+        assert!(
+            std::panic::catch_unwind(|| {
+                decrypt_file(
+                    output_file.to_str().unwrap(),
+                    input_file.to_str().unwrap(),
+                    invalid_password,
+                )
+            })
+            .is_err()
+        );
+        fs::remove_file(&input_file).expect("Unable to remove input file");
+        fs::remove_file(&output_file).expect("Unable to remove output file");
+    }
+
+    #[test]
+    fn test_main() {
+        let args: Vec<String> = vec![
+            "test".to_string(),
+            "encrypt".to_string(),
+            "test_input.txt".to_string(),
+            "--output".to_string(),
+            "test_output.txt".to_string(),
+        ];
+        let _ = Cli::try_parse_from(args);
+        // Add more tests for the main function if needed
+    }
+}
