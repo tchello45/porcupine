@@ -235,4 +235,12 @@ mod tests {
         let salt: [u8; 12] = generate_salt();
         assert_eq!(salt.len(), 12);
     }
+
+    #[test]
+    fn test_generate_key() {
+        let password: &[u8] = b"password";
+        let salt: [u8; 12] = generate_salt();
+        let key: GenericArray<u8, _> = generate_key(password, &salt);
+        assert_eq!(key.len(), 32);
+    }
 }
